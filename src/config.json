@@ -1,0 +1,7 @@
+{
+  "model_name": "sentence-transformers/paraphrase-mpnet-base-v2",
+  "dataset_name": "sst2",
+  "num_shots_per_class": 8,
+  "batch_size": 16,
+  "num_iterations": 20
+}
