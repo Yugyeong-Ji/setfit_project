@@ -13,9 +13,9 @@ from setfit import SetFitModel, SetFitTrainer
 from statistics import mean
 import torch
 
-# DEBUG
-print(SetFitTrainer.__module__)
-print(SetFitTrainer.__init__.__code__)
+# # DEBUG
+# print(SetFitTrainer.__module__)
+# print(SetFitTrainer.__init__.__code__)
 
 
 # add random seed
@@ -70,6 +70,7 @@ for seed in range(10):
 
     model = SetFitModel.from_pretrained(config["model_name"])
 
+    model.model_card_data = None # DEBUG
     # Trainer
     trainer = SetFitTrainer(
         model=model,
@@ -78,11 +79,10 @@ for seed in range(10):
         distance_metric="cosine", # add contrastive training
         metric=compute_metrics,
         batch_size=config["batch_size"],
-        num_iterations=config["num_iterations"]
+        num_iterations=config["num_iterations"],
+        # disable_model_card=True # DEBUG
     )
 
-    trainer.model.model_card_data = None # DEBUG
-    
     trainer.train()
     metrics = trainer.evaluate()
 
