@@ -3,53 +3,96 @@ from datasets import load_dataset
 from setfit import SetFitModel, SetFitTrainer
 from sklearn.metrics import accuracy_score, f1_score
 
-from datasets import Dataset
+from datasets import load_dataset, Dataset
+
+import random
+import numpy as np
+import os
+
+from setfit import SetFitModel, SetFitTrainer
+from statistics import mean
+import torch
+
+# DEBUG
+print(SetFitTrainer.__module__)
+print(SetFitTrainer.__init__.__code__)
 
 
-with open("src/config.json", "r") as f:
+# add random seed
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+# metric
+def compute_metrics(preds, labels):
+    return {
+        "accuracy": accuracy_score(labels, preds),
+        "f1": f1_score(labels, preds, average="weighted")
+    }
+
+with open("config.json", "r") as f:
     config = json.load(f)
 
 dataset = load_dataset(config["dataset_name"])
 label_set = list(set(dataset["train"]["label"]))
-few_shot = []
-per_label_count = {label: 0 for label in label_set}
 
-for ex in dataset["train"]:
-    if per_label_count[ex["label"]] < config["num_shots_per_class"]:
-        few_shot.append(ex)
-        per_label_count[ex["label"]] += 1
-    if all(count >= config["num_shots_per_class"] for count in per_label_count.values()):
-        break
+all_accuracies = []
+all_f1s = []
 
-# Convert to SetFit format
-# train_texts = [ex["sentence"] for ex in few_shot]
-# train_labels = [ex["label"] for ex in few_shot]
+for seed in range(10):
+    print(f"[Seed {seed}]")
+    set_seed(seed)
 
-# train_dataset = Dataset.from_dict({"text": train_texts, "label": train_labels})
-train_dataset = Dataset.from_dict({
-    "text": [ex["sentence"] for ex in few_shot],
-    "label": [ex["label"] for ex in few_shot]
-})
-eval_dataset = Dataset.from_dict({
-    "text": dataset["validation"]["sentence"],
-    "label": dataset["validation"]["label"]
-})
+    # Few-shot sampling
+    few_shot = []
+    per_label_count = {label: 0 for label in label_set}
+    shuffled_data = list(dataset["train"])
+    random.shuffle(shuffled_data)
 
-# Load model
-model = SetFitModel.from_pretrained(config["model_name"])
+    for ex in shuffled_data:
+        if per_label_count[ex["label"]] < config["num_shots_per_class"]:
+            few_shot.append(ex)
+            per_label_count[ex["label"]] += 1
+        if all(count >= config["num_shots_per_class"] for count in per_label_count.values()):
+            break
 
-# Trainer
-trainer = SetFitTrainer(
-    model=model,
-    train_dataset=train_dataset,
-    eval_dataset=eval_dataset,
-    metric="accuracy",
-    batch_size=config["batch_size"],
-    num_iterations=config["num_iterations"]
-)
+    train_dataset = Dataset.from_dict({
+        "text": [ex["sentence"] for ex in few_shot],
+        "label": [ex["label"] for ex in few_shot]
+    })
 
-trainer.train()
-metrics = trainer.evaluate()
+    eval_dataset = Dataset.from_dict({
+        "text": dataset["validation"]["sentence"],
+        "label": dataset["validation"]["label"]
+    })
 
-print("Accuracy:", metrics["accuracy"])
-print("F1 Score:", f1_score(dataset["validation"]["label"], trainer.model.predict(dataset["validation"]["sentence"]), average="weighted"))
+
+    model = SetFitModel.from_pretrained(config["model_name"])
+
+    # Trainer
+    trainer = SetFitTrainer(
+        model=model,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
+        distance_metric="cosine", # add contrastive training
+        metric=compute_metrics,
+        batch_size=config["batch_size"],
+        num_iterations=config["num_iterations"]
+    )
+
+    trainer.model.model_card_data = None # DEBUG
+    
+    trainer.train()
+    metrics = trainer.evaluate()
+
+    print("Accuracy:", metrics["accuracy"])
+    print("F1 Score:", metrics["f1"])
+
+    all_accuracies.append(metrics["accuracy"])
+    all_f1s.append(metrics["f1"])
+
+# averaged result
+print("\n Final Results over 10 seeds")
+print("Avg Accuracy:", round(mean(all_accuracies), 4))
+print("Avg F1 Score:", round(mean(all_f1s), 4))
