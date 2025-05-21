@@ -76,12 +76,17 @@ for seed in range(10):
     eval_dataset=eval_dataset,
     metric=compute_metrics
     )
-
+    # step 1: Contrastive fine-tuning
     trainer.train(
         batch_size=config["batch_size"],
         num_iterations=config["num_iterations"],
         distance_metric="cosine"
     )
+    # step 2: Classifier fine-tuning
+    # model.model_head.fit(train_dataset["text"], train_dataset["label"])
+    X_train = model.encode(train_dataset["text"])
+    y_train = train_dataset["label"]
+    model.model_head.fit(X_train, y_train)
 
     # trainer.train()
     metrics = trainer.evaluate()
