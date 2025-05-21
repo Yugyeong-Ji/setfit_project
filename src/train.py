@@ -1,6 +1,6 @@
 import json
 from datasets import load_dataset
-from setfit import SetFitModel, SetFitTrainer
+from setfit import SetFitModel, Trainer
 from sklearn.metrics import accuracy_score, f1_score
 
 from datasets import load_dataset, Dataset
@@ -9,9 +9,10 @@ import random
 import numpy as np
 import os
 
-from setfit import SetFitModel, SetFitTrainer
+# from setfit import SetFitModel, SetFitTrainer
 from statistics import mean
 import torch
+
 
 # # DEBUG
 # print(SetFitTrainer.__module__)
@@ -67,23 +68,22 @@ for seed in range(10):
         "label": dataset["validation"]["label"]
     })
 
-
     model = SetFitModel.from_pretrained(config["model_name"])
 
-    model.model_card_data = None # DEBUG
-    # Trainer
-    trainer = SetFitTrainer(
-        model=model,
-        train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
-        distance_metric="cosine", # add contrastive training
-        metric=compute_metrics,
-        batch_size=config["batch_size"],
-        num_iterations=config["num_iterations"],
-        # disable_model_card=True # DEBUG
+    trainer = Trainer(
+    model=model,
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset,
+    metric=compute_metrics
     )
 
-    trainer.train()
+    trainer.train(
+        batch_size=config["batch_size"],
+        num_iterations=config["num_iterations"],
+        distance_metric="cosine"
+    )
+
+    # trainer.train()
     metrics = trainer.evaluate()
 
     print("Accuracy:", metrics["accuracy"])
