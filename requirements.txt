@@ -1,7 +1,11 @@
 setfit
-datasets
 transformers
 scikit-learn
 matplotlib
 numpy
-torch
+torch>=1.10.0
+sentence-transformers>=2.2.2
+datasets>=2.4.0
+scikit-learn>=1.0.2
+numpy>=1.21.0
+tqdm>=4.62.3
