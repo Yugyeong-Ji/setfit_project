@@ -32,10 +32,6 @@ python train.py
 
 ---
 
-아래는 `README.md`에 바로 추가할 수 있는 **실험 설정 및 성능 비교 표**입니다. 논문과 동일한 설정을 사용했고, 결과도 논문 수치와 매우 근접함을 강조하는 구성으로 작성했습니다.
-
----
-
 ### ⚙️ Experiment Configuration
 
 All experiments were run using the **same setup described in the SetFit paper**, including architecture, training strategy, and hyperparameters:
