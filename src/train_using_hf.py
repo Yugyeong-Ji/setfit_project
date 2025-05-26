@@ -13,6 +13,8 @@ import os
 from statistics import mean
 import torch
 
+from sklearn.linear_model import LogisticRegression
+
 
 # # DEBUG
 # print(SetFitTrainer.__module__)
@@ -69,6 +71,13 @@ for seed in range(10):
     })
 
     model = SetFitModel.from_pretrained(config["model_name"])
+
+    model.model_head = LogisticRegression(
+    max_iter=1000,
+    C=1.0,
+    class_weight="balanced",
+    random_state=seed
+    )
 
     trainer = Trainer(
     model=model,
