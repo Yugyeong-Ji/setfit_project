@@ -27,7 +27,7 @@ NCCL_P2P_DISABLE=1 NCCL_IB_DISABLE=1 CUDA_VISIBLE_DEVICES=0 python train.py
 For all other GPUs, you can run the training script normally:
 
 ```bash
-python train.py
+CUDA_VISIBLE_DEVICES=0 python train.py
 ```
 
 ---
