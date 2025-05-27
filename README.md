@@ -74,14 +74,14 @@ learning_rate = 1e-3
 num_seeds = 10
 dataset_name = "sst2"
 ```
-
 ---
 
 ### 📊 Performance Comparison (SST-2, 8-shot)
 
-| Metric                  | Our Implementation (Reproduced) | SetFit Paper   |
-| ----------------------- | ------------------------------- | -------------- |
-| Avg Accuracy (10 seeds) | **84.21%**                      | **84.0%**      |
-| Avg F1 Score (10 seeds) | **84.09%**                      | *Not reported* |
+| Metric                  | Our Implementation (Reproduced) | SetFit Paper   | Without Contrastive (Ablation) |
+| ----------------------- | ------------------------------- | -------------- | ------------------------------ |
+| Avg Accuracy (10 seeds) | **84.21%**                      | **84.0%**      | **79.42%**                     |
+| Avg F1 Score (10 seeds) | **84.09%**                      | *Not reported* | **79.25%**                     |
 
+---
 ✅ Our implementation **faithfully reproduces** the performance of the SetFit paper on the SST-2 dataset using 8-shot contrastive fine-tuning and logistic regression on top of the fine-tuned embeddings.
