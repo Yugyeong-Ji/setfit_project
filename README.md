@@ -1,5 +1,32 @@
 # SetFit Few-Shot Text Classification
 ---
+### 🛠️ Environment Setup
+
+We recommend using Python **3.9** for compatibility with all required libraries.
+
+#### Using `requirements.txt`
+
+To install the dependencies, run:
+
+```bash
+pip install -r requirements.txt
+```
+
+Your `requirements.txt` should include:
+
+```txt
+python==3.9
+setfit
+transformers
+sentence-transformers>=2.2.2
+datasets>=2.4.0
+scikit-learn>=1.0.2
+numpy>=1.21.0
+torch>=1.10.0
+matplotlib
+tqdm>=4.62.3
+```
+---
 ### 🧪 Training Methods
 
 This project provides two implementations for training SetFit models:
